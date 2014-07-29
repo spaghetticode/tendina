@@ -10,28 +10,21 @@ Released under the MIT License
 
     # Default options
     defaults:
-      animate: true
-      speed: 500
-      onHover: false
+      animate:    true
+      speed:      500
+      onHover:    false
       hoverDelay: 200
       activeMenu: null
 
     constructor: (el, options) ->
-      @options = $.extend({}, @defaults, options)
-      @$el     = $(el)
-
-      # Checks if options object
-      # contains wrong values
-      @_checkOptions()
-
+      @$el = $(el)
+      @_setOptions options
       # Gets element selector - needed
       # for multiple menu initialization
-      @elSelector = @_getSelector(@$el)
-
+      @elSelector = @_getSelector()
       # Adds tendina class to element
       # for better reference
       @$el.addClass('tendina')
-
       # Sets class variables for relevant elements.
       # I'm doing this instead of wrapping every element
       # in a jQuery object in order to correctly
@@ -64,11 +57,10 @@ Released under the MIT License
     _unbindEvents: ->
       $(document).off @mouseEvent
 
-    _getSelector: (el) ->
-      firstClass = $(el).attr('class')?.split(' ')[0]
-      elId       = $(el).attr('id')
-
-      if (elId isnt undefined) then "##{elId}" else ".#{firstClass}"
+    _getSelector: ->
+      firstClass = @$el.attr('class')?.split(' ')[0]
+      elId       = @$el.attr('id')
+      if elId isnt undefined then "##{elId}" else ".#{firstClass}"
 
     _isFirstLevel: (targetEl) ->
       # Checks if target element
@@ -104,14 +96,14 @@ Released under the MIT License
 
       # Closes all currently open menus
       # and opens the targeted one
-      @_close($firstNestedMenu)
-      @_open($targetNestedMenu)
+      @_close $firstNestedMenu
+      @_open $targetNestedMenu
 
       # If target element is a first-level
       # menu, closes all opened second-level submenus
       if el is @firstLvlSubmenu
         $(el).find('> ul > li').removeClass 'selected'
-        @_close($lastNestedMenu)
+        @_close $lastNestedMenu
 
       # After opening, fire callback
       @options.openCallback $(targetEl).parent() if @options.openCallback
@@ -178,10 +170,13 @@ Released under the MIT License
       $activeMenu.parent().addClass 'selected'
       $activeParents.parent().addClass 'selected'
 
-    _checkOptions: ->
+    _setOptions: (options) ->
+      @options = $.extend {}, @defaults, options
+      # Checks if options object
+      # contains wrong values
       if @options.animate isnt true and @options.animate isnt false
         console.warn "jQuery.fn.Tendina - '#{@options.animate}' is not a valid parameter for the 'animate' option. Falling back to default value."
-      if @options.speed   isnt parseInt(@options.speed)
+      if @options.speed   isnt parseInt(@options.speed, 10)
         console.warn "jQuery.fn.Tendina - '#{@options.speed}' is not a valid parameter for the 'speed' option. Falling back to default value."
       if @options.onHover isnt true and @options.onHover isnt false
         console.warn "jQuery.fn.Tendina - '#{@options.onHover}' is not a valid parameter for the 'onHover' option. Falling back to default value."
